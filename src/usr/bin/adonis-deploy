@@ -1,0 +1,59 @@
+#!/bin/bash
+#
+# Commits the package, builds package with svn-buildpackage and
+# deploys with dput.  Be sure to run this script from the package base
+# directory.
+
+# If there are errors, stop execution
+set -e
+
+# Basic sanity checks
+if [ ! -d debian ]; then
+    echo "Script must be run from the package base directory" >&2
+    exit 1
+fi
+if [ ! -f debian/changelog ]; then
+    echo "Package has no changelog, cannot continue" >&2
+    exit 1
+fi
+
+# Where are you deploying to?
+if head -n1 debian/changelog | grep -q "\-nonfree;"; then
+    REPO=NONFREE;
+elif head -n1 debian/changelog | grep -q "\-nonfree-test;"; then
+    REPO=NONFREETEST;
+elif head -n1 debian/changelog | grep -q "\-test;"; then
+    REPO=LOUD;
+else
+    REPO=STABLE;
+fi
+
+# Checks for loaded ssh keys
+ssh-add -l >/dev/null || (echo "No ssh keys loaded, cannot continue without keys" && exit 1)
+
+# Create and sanitize build-area
+if [ ! -d ../build-area ]; then
+    mkdir -p ../build-area
+fi
+rm -rf ../build-area/*
+
+# Commit changes
+lci
+
+# Figure out arguments for svn-buildpackage
+PACKAGENAME=`head -1 debian/changelog | cut -f1 -d" "`
+buildargs="-us -uc --svn-tag -rfakeroot --svn-override=tagsUrl=https://svn.lcsee.wvu.edu/loud/${PACKAGENAME}/tags --svn-noautodch"
+if [ $PACKAGENAME == lcsee-sysstaff-reference ]; then
+    buildargs="$buildargs --svn-ignore"
+fi
+
+# Build the package
+buildout=$(mktemp)
+svn-buildpackage $buildargs 2>&1|tee $buildout
+
+# Upload the package
+changes=$(egrep -A1 "The changes file is:$" $buildout|tail -n1)
+
+dput -u ${REPO} $changes
+
+exit 0

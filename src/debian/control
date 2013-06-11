@@ -1,0 +1,13 @@
+Source: adonis-devscripts
+Section: admin
+Priority: optional
+Maintainer: Bobby Martin <bobb.mrtn@gmail.com>
+Build-Depends: debhelper (>= 5.0.0)
+Standards-Version: 3.6.2
+
+Package: adonis-devscripts
+Architecture: all
+Depends: dh-make, git, debhelper, devscripts
+Description:  utility for creating adonis compliant packages
+utility for creating adonis compliant packages
+

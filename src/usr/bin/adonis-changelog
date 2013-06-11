@@ -1,0 +1,10 @@
+#!/bin/bash
+
+if [ -d ./debian ]; then
+	CUT=`head -1 debian/changelog |cut -f3 -d " "`
+	DISTRO=`echo $CUT |sed 's/;//'`
+	
+	dch --no-auto-nmu --vendor=adonis --distribution=${DISTRO} $@
+else
+    echo "Wrong directory or missing debian folder"
+fi

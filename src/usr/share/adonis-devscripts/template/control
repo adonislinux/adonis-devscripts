@@ -1,0 +1,12 @@
+Source: #PACKAGE#
+Section: admin
+Priority: optional
+Maintainer: #USERNAME# <#EMAIL#>
+Build-Depends: cdbs, debhelper (>= 5.0.0)
+Standards-Version: #POLICY#
+
+Package: #PACKAGE#
+Architecture: all
+Depends: 
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>

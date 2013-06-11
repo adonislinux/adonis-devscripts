@@ -1,0 +1,17 @@
+#!/bin/bash
+#
+# usage lh_make <packagename>
+#
+# ex: lh_make loud-new-package
+
+
+TEMPLATEDIR="/usr/share/adonis-devscripts/template"
+
+PKGNAME=""
+PNAME="${1}"
+PVER=`head -n 1 ${TEMPLATEDIR}/changelog | awk 'BEGIN{FS="(";RS=")"}/\(/{print $2}'`
+PKGNAME="-p ${PNAME}_${PVER}"
+
+
+echo "" | dh_make -n -r cdbs ${PKGNAME} --templates ${TEMPLATEDIR} -d
+

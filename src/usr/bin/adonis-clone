@@ -1,0 +1,69 @@
+#!/bin/sh 
+#
+# Checks out a branch, tag, or trunk  of a loud package. By default the lprecise branch 
+#
+# For example:
+#
+# $ lco loud-utils
+#
+
+DEFAULT=lraring
+
+help()
+{
+    echo "Thought you needed --help, huh?"
+    echo "That's ok, we're here to help"
+    echo 
+    echo "Usage:"
+    echo "\tlco package [--branch {branch}] [--tag {tag}] [--trunk]"
+    echo 
+    echo "Branches:"
+    echo "\tTypically {branch} will be one of 'nattyl', or 'lprecise'"
+    echo
+    echo "Tag:"
+    echo "\tAn example {tag} would be '10.6.6', or '9.1.4'"
+    echo
+    echo "Trunk:"
+    echo "\tThere is only one truck use --trunk [NAME OF PACKAGE]"
+}
+
+while [ $1 ]
+do
+    if [ "${1}" = "--help" ]; then
+	help
+	exit
+    elif [ "${1}" = "--branch" ]; then
+	shift
+	BRANCH=${1}
+	echo "Selecting branch: ${BRANCH}"
+    elif [ "${1}" = "--trunk" ]; then
+	shift
+	PKG=${1}
+	TRUNK=trunk
+	echo "Selecting ${TRUNK}"
+    elif [ "${1}" = "--tag" ]; then
+	shift
+	TAG=${1}
+	echo "Selecting tag: ${TAG}"
+    else
+	PKG=${1}
+	echo "Selecting package: ${PKG}"
+    fi
+    shift
+done
+
+[ -z "${PKG}" ] && echo "No package selected: ${PKG}"&& help && exit 1
+
+if [ -n "${BRANCH}" ]; then
+    SVN="https://svn.lcsee.wvu.edu/loud/${PKG}/branches/${BRANCH}";
+elif [ -n "${TAG}" ]; then
+    SVN="https://svn.lcsee.wvu.edu/loud/${PKG}/tags/${TAG}";
+elif [ -n "${TRUNK}" ]; then
+    SVN="https://svn.lcsee.wvu.edu/loud/${PKG}/${TRUNK}";
+else
+    SVN="https://svn.lcsee.wvu.edu/loud/${PKG}/branches/${DEFAULT}";
+fi
+
+echo "Checking out from: ${SVN}"
+
+mkdir -p ${PKG} && cd ${PKG} && svn checkout ${SVN} && cd ..
