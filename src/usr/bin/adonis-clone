@@ -7,7 +7,10 @@
 # $ lco loud-utils
 #
 
-DEFAULT=lraring
+DEFAULT=main
+PROP="clone_url"
+
+
 
 help()
 {
@@ -15,36 +18,43 @@ help()
     echo "That's ok, we're here to help"
     echo 
     echo "Usage:"
-    echo "\tlco package [--branch {branch}] [--tag {tag}] [--trunk]"
+    echo $0" package"
     echo 
-    echo "Branches:"
-    echo "\tTypically {branch} will be one of 'nattyl', or 'lprecise'"
-    echo
-    echo "Tag:"
-    echo "\tAn example {tag} would be '10.6.6', or '9.1.4'"
-    echo
-    echo "Trunk:"
-    echo "\tThere is only one truck use --trunk [NAME OF PACKAGE]"
+    echo "List All Packages"
+    echo $0" --list"
 }
+
+list()
+{
+    $PROP="name"
+    val=`jsonval`
+    for url  in $val ; do
+    echo $url 
+    done
+}
+
+jsonval() 
+{
+  echo `curl -s -X GET https://api.github.com/users/adonislinux/repos | grep $prop | awk  '{ sub(/\"'''$prop'''\": /, ""); print}'  | tr \", " "`
+}
+
+clone()
+{
+    exit 1
+}
+
 
 while [ $1 ]
 do
     if [ "${1}" = "--help" ]; then
 	help
 	exit
-    elif [ "${1}" = "--branch" ]; then
+    elif [ "${1}" = "-s" ]; then
 	shift
-	BRANCH=${1}
-	echo "Selecting branch: ${BRANCH}"
-    elif [ "${1}" = "--trunk" ]; then
+	PROP="ssh_url"
+    elif [ "${1}" = "--list" ]; then
 	shift
-	PKG=${1}
-	TRUNK=trunk
-	echo "Selecting ${TRUNK}"
-    elif [ "${1}" = "--tag" ]; then
-	shift
-	TAG=${1}
-	echo "Selecting tag: ${TAG}"
+	list
     else
 	PKG=${1}
 	echo "Selecting package: ${PKG}"
@@ -67,3 +77,33 @@ fi
 echo "Checking out from: ${SVN}"
 
 mkdir -p ${PKG} && cd ${PKG} && svn checkout ${SVN} && cd ..
+
+
+ 
+# # prop="ssh_url"
+# # urls=`jsonval`
+ 
+#  function list
+# {
+#     echo`curl -s -X GET https://api.github.com/users/adonislinux/repos | grep "\"name\":"  | awk  '{ sub(/\"name\": /, ""); print}' | tr \", " "`
+# }
+
+# function list-desc
+# {
+#     echo`curl -s -X GET https://api.github.com/users/adonislinux/repos | grep "\"description\":"  | awk  '{ sub(/\"description\": /, ""); print}'`
+# }
+
+# prop="\"name\":"
+# #urls=`jsonval`                                                                                                                                                    
+# IFS=","
+
+# repodesc=(`list-desc`)
+# #repos=`list`                                                                                                                                                      
+# #echo $repos | sed s/,/\n/g                                                                                                                                        
+
+
+# echo`${repodesc[0]} | tr "\"" "\000"`
+# #for repod  in $repodesc ; do                                                                                                                                      
+# #    echo $repod | tr "\"" "\000"                                                                                                                                  
+#done                                                                                                                                                              
+
