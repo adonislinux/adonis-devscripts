@@ -2,7 +2,7 @@
 
 jsonval() 
 {
-    echo `cat /var/tmp/repos | grep $prop | awk  '{ sub(/\"'''$prop'''\": /, ""); print}'  | tr \", " "`
+    echo `cat /var/tmp/repos | grep $prop` 
 }
 
 list()
@@ -37,17 +37,18 @@ if [ "${1}" = "--help" -o "${1}" = "-h" ]; then
     usage
     exit
 fi
-
+ 
 ##List all repos
 if [ "${1}" = "--list" -o "${1}" = "-l" ]; then
     repos=$(list)
+    
     for repo in $repos ; do
-	echo $repo
+	echo $repo 
     done
     
     exit
 fi
- 
+  
 ##List all repos with descriptions
 if [ "${1}" = "--descriptions" -o "${1}" = "-d" ]; then
     repos=$(list)
@@ -60,6 +61,29 @@ for repod  in $repos ; do
     count=$[$count +1]
 done
 fi
+
+##Search for a property
+if [ "${1}" = "--property" -o "${1}" = "-p" ]; then
+    prop="\""${2}"\""
+    values=$(jsonval)
+    repos=$(list)
+    IFS=","
+    for value in $values ; do
+	echo $value | xargs | cut -d' ' -f2 
+    done    
+    exit
+fi
+
+##Update repo list
+if [ "${1}" = "--update" -o "${1}" = "-u" ]; then
+    refresh
+    exit
+fi
+
+
+
+
+
 ###############
 ##Everything below this is test code and can be ignored
 ###############
