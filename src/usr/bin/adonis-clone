@@ -1,109 +1,65 @@
-#!/bin/sh 
-#
-# Checks out a branch, tag, or trunk  of a loud package. By default the lprecise branch 
-#
-# For example:
-#
-# $ lco loud-utils
-#
+#!/bin/bash
 
-DEFAULT=main
-PROP="clone_url"
-
-
-
-help()
+jsonval() 
 {
-    echo "Thought you needed --help, huh?"
-    echo "That's ok, we're here to help"
-    echo 
-    echo "Usage:"
-    echo $0" package"
-    echo 
-    echo "List All Packages"
-    echo $0" --list"
+    echo `cat /var/tmp/repos | grep $prop | awk  '{ sub(/\"'''$prop'''\": /, ""); print}'  | tr \", " "`
 }
 
 list()
 {
-    $PROP="name"
-    val=`jsonval`
-    for url  in $val ; do
-    echo $url 
-    done
+    echo `cat /var/tmp/repos | grep "\"name\":"  | awk  '{ sub(/\"name\": /, ""); print}' | tr \", " "`
 }
 
-jsonval() 
+list-desc()
 {
-  echo `curl -s -X GET https://api.github.com/users/adonislinux/repos | grep $prop | awk  '{ sub(/\"'''$prop'''\": /, ""); print}'  | tr \", " "`
+    echo `cat /var/tmp/repos | grep "\"description\":"  | awk  '{ sub(/\"description\": /, ""); print}'`
 }
 
-clone()
+refresh()
 {
-    exit 1
+    curl -s -X GET https://api.github.com/users/adonislinux/repos > /var/tmp/repos
 }
 
+usage()
+{
 
-while [ $1 ]
-do
-    if [ "${1}" = "--help" ]; then
-	help
-	exit
-    elif [ "${1}" = "-s" ]; then
-	shift
-	PROP="ssh_url"
-    elif [ "${1}" = "--list" ]; then
-	shift
-	list
-    else
-	PKG=${1}
-	echo "Selecting package: ${PKG}"
-    fi
-    shift
-done
+cat <<EOF
+Usage: ${0}  [ -h|--help --list --list-desc ]
+EOF
+}
 
-[ -z "${PKG}" ] && echo "No package selected: ${PKG}"&& help && exit 1
-
-if [ -n "${BRANCH}" ]; then
-    SVN="https://svn.lcsee.wvu.edu/loud/${PKG}/branches/${BRANCH}";
-elif [ -n "${TAG}" ]; then
-    SVN="https://svn.lcsee.wvu.edu/loud/${PKG}/tags/${TAG}";
-elif [ -n "${TRUNK}" ]; then
-    SVN="https://svn.lcsee.wvu.edu/loud/${PKG}/${TRUNK}";
-else
-    SVN="https://svn.lcsee.wvu.edu/loud/${PKG}/branches/${DEFAULT}";
+#If this is the first time this is being run, create the repo json file
+if ! [ -f /var/tmp/repos ]; then
+    refresh
 fi
 
-echo "Checking out from: ${SVN}"
-
-mkdir -p ${PKG} && cd ${PKG} && svn checkout ${SVN} && cd ..
-
-
- 
-# # prop="ssh_url"
-# # urls=`jsonval`
- 
-#  function list
-# {
-#     echo`curl -s -X GET https://api.github.com/users/adonislinux/repos | grep "\"name\":"  | awk  '{ sub(/\"name\": /, ""); print}' | tr \", " "`
-# }
-
-# function list-desc
-# {
-#     echo`curl -s -X GET https://api.github.com/users/adonislinux/repos | grep "\"description\":"  | awk  '{ sub(/\"description\": /, ""); print}'`
-# }
-
-# prop="\"name\":"
-# #urls=`jsonval`                                                                                                                                                    
-# IFS=","
-
-# repodesc=(`list-desc`)
-# #repos=`list`                                                                                                                                                      
-# #echo $repos | sed s/,/\n/g                                                                                                                                        
+if [ "${1}" = "--help" -o "${1}" = "-h" ]; then
+    usage
+    exit
+fi
 
 
-# echo`${repodesc[0]} | tr "\"" "\000"`
-# #for repod  in $repodesc ; do                                                                                                                                      
-# #    echo $repod | tr "\"" "\000"                                                                                                                                  
-#done                                                                                                                                                              
+###############
+##Everything below this is test code and can be ignored
+###############
+
+echo `list-desc`
+
+
+json=`cat /var/tmp/repos`
+prop="\"name\":"
+#urls=`jsonval`
+
+#repodesc=`list-desc`
+#echo `list`
+#repos=`list`
+#echo $repos | sed s/,/\n/g
+#IFS=","
+# count=1
+# for repod  in $repos ; do
+#     head=$repod
+#     desc=`echo $repodesc | cut -d',' -f"$count"`
+#     echo $head "-" $desc 
+#     count=$[$count +1]
+# done
 
