@@ -27,13 +27,15 @@ usage()
 EOF
 }
 
+
+
 #If this is the first time this is being run, create the repo json file
 if ! [ -f /var/tmp/repos ]; then
     refresh
 fi
 
 ##Usage
-if [ "${1}" = "--help" -o "${1}" = "-h" ]; then
+if [ "${1}" = "--help" -o "${1}" = "-h"  -o -z "${1}" ]; then
     usage
     exit
 fi
@@ -80,6 +82,19 @@ if [ "${1}" = "--update" -o "${1}" = "-u" ]; then
     exit
 fi
 
+##Clone  a repo
+if [ "${1}" = "--clone" -o "${1}" = "-c" ]; then
+    if ! [[ -z ${2} ]]; then
+	git clone http://github.com/adonislinux/${2}.git
+     else
+	echo "You must specify a package name" 
+     fi
+elif ! [[ -z ${1} ]]; then
+    echo "No flags specified, defaulting to clone"
+    git clone http://github.com/adonislinux/${1}.git
+fi
+
+exit
 
 
 
