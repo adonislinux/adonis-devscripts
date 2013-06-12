@@ -22,9 +22,8 @@ refresh()
 
 usage()
 {
-
-cat <<EOF
-Usage: ${0}  [ -h|--help --list --list-desc ]
+    cat <<EOF
+    Usage: ${0}  [ -h|--help --list --list-desc ] 
 EOF
 }
 
@@ -33,17 +32,39 @@ if ! [ -f /var/tmp/repos ]; then
     refresh
 fi
 
+##Usage
 if [ "${1}" = "--help" -o "${1}" = "-h" ]; then
     usage
     exit
 fi
 
-
+##List all repos
+if [ "${1}" = "--list" -o "${1}" = "-l" ]; then
+    repos=$(list)
+    for repo in $repos ; do
+	echo $repo
+    done
+    
+    exit
+fi
+ 
+##List all repos with descriptions
+if [ "${1}" = "--descriptions" -o "${1}" = "-d" ]; then
+    repos=$(list)
+    repodesc=$(list-desc)
+    count=1
+for repod  in $repos ; do
+    head=$repod
+    desc=`echo $repodesc | cut -d',' -f$count`
+    echo $head "-" $desc 
+    count=$[$count +1]
+done
+fi
 ###############
 ##Everything below this is test code and can be ignored
 ###############
 
-echo `list-desc`
+#echo `list-desc`
 
 
 json=`cat /var/tmp/repos`
@@ -56,10 +77,4 @@ prop="\"name\":"
 #echo $repos | sed s/,/\n/g
 #IFS=","
 # count=1
-# for repod  in $repos ; do
-#     head=$repod
-#     desc=`echo $repodesc | cut -d',' -f"$count"`
-#     echo $head "-" $desc 
-#     count=$[$count +1]
-# done
 
