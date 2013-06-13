@@ -1,59 +1,54 @@
 #!/bin/bash
-#
-# Commits the package, builds package with svn-buildpackage and
-# deploys with dput.  Be sure to run this script from the package base
-# directory.
 
-# If there are errors, stop execution
-set -e
+## outputs comments from debian/changelog
+getComments() {
+    TMP="`awk '
+/ --/ {exit};
+/^$/ {next};
+/  \*/ && foo != 1 {foo = 1; print; next};
+foo == 1 {print}' debian/changelog`"
 
-# Basic sanity checks
-if [ ! -d debian ]; then
-    echo "Script must be run from the package base directory" >&2
-    exit 1
-fi
-if [ ! -f debian/changelog ]; then
-    echo "Package has no changelog, cannot continue" >&2
-    exit 1
-fi
+    COMMENT=$(echo "${TMP}" |tr -d '\n')
 
-# Where are you deploying to?
-if head -n1 debian/changelog | grep -q "\-nonfree;"; then
-    REPO=NONFREE;
-elif head -n1 debian/changelog | grep -q "\-nonfree-test;"; then
-    REPO=NONFREETEST;
-elif head -n1 debian/changelog | grep -q "\-test;"; then
-    REPO=LOUD;
+    shopt -s extglob
+    COMMENT="${COMMENT##*( )}"
+
+    echo "${COMMENT}"
+    shopt -u extglob
+}
+
+## get the current version number
+## from debian/changelog
+getVersion() {
+    echo `head -n1 debian/changelog` |cut -f2 -d "(" |cut -f1 -d ")"
+}
+
+if [ -d ./debian ]; then
+    ## commit and tag
+    git add ../*
+    echo ""
+    git commit -m "$(getComments)"
+    git tag -a "v$(getVersion)" -m "$(getComments)"
+    echo ""
+    
+    ## are your tag and comments correct
+    git status
+    echo ""
+    echo -n "push changes? [y/N] "
+    read -n 1 response
+    echo ""
+    response=`echo $response |tr '[:upper:]' '[:lower:]'`
+
+    if [ "${response}" == "y" ]; then
+    	git push origin HEAD
+    	git push --tags
+    elif [ "${response}" == "" -o "${response}" == "n" ]; then
+    	echo "Stopping deploy"
+    else
+    	echo "Invalid response"
+    	exit 1
+    fi
 else
-    REPO=STABLE;
+    echo "Wrong directory; no debian folder found"
+    exit 1
 fi
-
-# Checks for loaded ssh keys
-ssh-add -l >/dev/null || (echo "No ssh keys loaded, cannot continue without keys" && exit 1)
-
-# Create and sanitize build-area
-if [ ! -d ../build-area ]; then
-    mkdir -p ../build-area
-fi
-rm -rf ../build-area/*
-
-# Commit changes
-lci
-
-# Figure out arguments for svn-buildpackage
-PACKAGENAME=`head -1 debian/changelog | cut -f1 -d" "`
-buildargs="-us -uc --svn-tag -rfakeroot --svn-override=tagsUrl=https://svn.lcsee.wvu.edu/loud/${PACKAGENAME}/tags --svn-noautodch"
-if [ $PACKAGENAME == lcsee-sysstaff-reference ]; then
-    buildargs="$buildargs --svn-ignore"
-fi
-
-# Build the package
-buildout=$(mktemp)
-svn-buildpackage $buildargs 2>&1|tee $buildout
-
-# Upload the package
-changes=$(egrep -A1 "The changes file is:$" $buildout|tail -n1)
-
-dput -u ${REPO} $changes
-
-exit 0
