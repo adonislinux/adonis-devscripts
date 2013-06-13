@@ -1,2 +1,29 @@
-#! /bin/bash
+#!/bin/bash
+########################################################
+# Builds a .deb package
+# Bobby Martin <bobb.mrtn@gmail.com>
+# 
+# RFE:
+# 1.Copy files to a temp dir and build it there, 
+# then oopy it to the proper directory. 
+########################################################
 
+if [ -d ./debian ]; then
+    ## build package
+    dpkg-buildpackage -uc -us -rfakeroot
+
+    #Get package name
+    PACKAGENAME=${PWD##*/}
+    ## remove unnecessary files
+    rm -rf debian/${PACKAGENAME} debian/files
+    rm ../*.changes ../*.dsc
+    
+    ## deploy; should use deploy for localhost first
+    if [ -f /usr/bin/deploy ]; then
+	deploy
+    else
+	bin/deploy
+    fi
+else
+    echo "Can't find debian folder; stopping"
+fi
