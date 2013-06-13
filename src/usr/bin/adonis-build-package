@@ -1,11 +1,9 @@
 #!/bin/bash
 ########################################################
+#
 # Builds a .deb package
 # Bobby Martin <bobb.mrtn@gmail.com>
 # 
-# RFE:
-# 1.Copy files to a temp dir and build it there, 
-# then oopy it to the proper directory. 
 ########################################################
 
 if [ -d ./src ]; then
