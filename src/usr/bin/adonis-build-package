@@ -17,7 +17,7 @@ if [ -d ./src ]; then
 	if [ -d /var/tmp/$PACKAGENAME ]; then
  	    rm -rf /var/tmp/$PACKAGENAME
 	fi
-        
+        rm /var/tmp/*.deb
         #Make temp dir and copy package files to it
 	mkdir -p /var/tmp/$PACKAGENAME
 	cp -r ./src/* /var/tmp/$PACKAGENAME
