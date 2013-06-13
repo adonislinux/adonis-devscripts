@@ -8,22 +8,36 @@
 # then oopy it to the proper directory. 
 ########################################################
 
-if [ -d ./debian ]; then
-    ## build package
-    dpkg-buildpackage -uc -us -rfakeroot
+if [ -d ./src ]; then
+    if [ -d ./src/debian ]; then
 
-    #Get package name
-    PACKAGENAME=${PWD##*/}
-    ## remove unnecessary files
-    rm -rf debian/${PACKAGENAME} debian/files
-    rm ../*.changes ../*.dsc
-    
-    ## deploy; should use deploy for localhost first
-    if [ -f /usr/bin/deploy ]; then
-	deploy
+      #Get package name
+      PACKAGENAME=${PWD##*/}
+      CURRDIR=`pwd`
+       
+        #Check to see if there's old files, remove them
+	if [ -d /var/tmp/$PACKAGENAME ]; then
+ 	    rm -rf /var/tmp/$PACKAGENAME
+	fi
+        
+        #Make temp dir and copy package files to it
+	mkdir -p /var/tmp/$PACKAGENAME
+	cp -r ./src/* /var/tmp/$PACKAGENAME
+	
+	#Build package
+	cd /var/tmp/$PACKAGENAME && dpkg-buildpackage -uc -us -rfakeroot
+        cd $CURRDIR
+	#Check for a deb folder in the original location
+ 	if  ! [ -d $CURRDIR/deb ]; then
+	    mkdir -p $CURRDIR/deb
+	fi
+	
+	#Copy the deb from the build location
+	cp /var/tmp/*.deb $CURRDIR/deb
+	
     else
-	bin/deploy
+	echo "Can't find debian folder; stopping"
     fi
 else
-    echo "Can't find debian folder; stopping"
+    echo "Can't find src folder; stopping"
 fi
