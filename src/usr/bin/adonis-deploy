@@ -6,7 +6,7 @@ getComments() {
 / --/ {exit};
 /^$/ {next};
 /  \*/ && foo != 1 {foo = 1; print; next};
-foo == 1 {print}' debian/changelog`"
+foo == 1 {print}' src/debian/changelog`"
 
     COMMENT=$(echo "${TMP}" |tr -d '\n')
 
@@ -20,12 +20,33 @@ foo == 1 {print}' debian/changelog`"
 ## get the current version number
 ## from debian/changelog
 getVersion() {
-    echo `head -n1 debian/changelog` |cut -f2 -d "(" |cut -f1 -d ")"
+    echo `head -n1 src/debian/changelog` |cut -f2 -d "(" |cut -f1 -d ")"
 }
 
-if [ -d ./debian ]; then
-    ## commit and tag
-    git add ../*
+usage()
+{
+    cat <<EOF                                                                   
+    Usage: ${0}  [ -b|--build ]
+EOF
+}
+
+
+
+##Usage                                                                         
+if [ "${1}" = "--help" -o "${1}" = "-h"  -o -z "${1}" ]; then
+    usage
+    exit
+fi
+
+##Build package                                                                         
+if [ "${1}" = "-b" -o "${1}" = "--build" ]; then
+    git rm -f ./deb/*
+    adonis-build-package
+fi
+
+
+#if [ -d ./debian ]; then    ## commit and tag
+    git add ./*
     echo ""
     git commit -m "$(getComments)"
     git tag -a "v$(getVersion)" -m "$(getComments)"
@@ -40,7 +61,7 @@ if [ -d ./debian ]; then
     response=`echo $response |tr '[:upper:]' '[:lower:]'`
 
     if [ "${response}" == "y" ]; then
-    	git push origin HEAD
+    	git push origin master
     	git push --tags
     elif [ "${response}" == "" -o "${response}" == "n" ]; then
     	echo "Stopping deploy"
@@ -48,7 +69,7 @@ if [ -d ./debian ]; then
     	echo "Invalid response"
     	exit 1
     fi
-else
-    echo "Wrong directory; no debian folder found"
-    exit 1
-fi
+#else
+#    echo "Wrong directory; no debian folder found"
+#    exit 1
+#fi
