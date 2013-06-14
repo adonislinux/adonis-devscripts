@@ -32,26 +32,27 @@ EOF
 
 
 
-##Usage                                                                         
+##Usage                                                                        
 if [ "${1}" = "--help" -o "${1}" = "-h"  -o -z "${1}" ]; then
     usage
     exit
 fi
 
-##Build package                                                                         
+##Build package                                                   
 if [ "${1}" = "-b" -o "${1}" = "--build" ]; then
     git rm -f ./deb/*
     adonis-build-package
-fi
-
-
-#if [ -d ./debian ]; then    ## commit and tag
     git add ./*
     echo ""
     git commit -m "$(getComments)"
-    git tag -a "v$(getVersion)" -m "$(getComments)"
     echo ""
-    
+    git tag -a "v$(getVersion)" -m "$(getComments)" 
+else #just commit
+    git add ./*
+    echo ""
+fi 
+
+        
     ## are your tag and comments correct
     git status
     echo ""
@@ -62,7 +63,9 @@ fi
 
     if [ "${response}" == "y" ]; then
     	git push origin master
-    	git push --tags
+    	if [ "${1}" = "-b" -o "${1}" = "--build" ]; then
+	    git push --tags
+	fi
     elif [ "${response}" == "" -o "${response}" == "n" ]; then
     	echo "Stopping deploy"
     else
