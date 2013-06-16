@@ -40,16 +40,25 @@ fi
 
 ##Build package                                                   
 if [ "${1}" = "-b" -o "${1}" = "--build" ]; then
-    git rm -f ./deb/*
-    adonis-build-package
-    git add ./*
-    echo ""
-    git commit -m "$(getComments)"
-    echo ""
-    git tag -a "v$(getVersion)" -m "$(getComments)" 
-else #just commit
-    git add ./*
-    echo ""
+    if [ -d ./src ]; then
+	if [ -d ./src/debian ]; then
+	    git rm -f ./deb/*
+	    adonis-build-package
+	    git add ./*
+	    echo ""
+	    git commit -m "$(getComments)"
+	    echo ""
+	    git tag -a "v$(getVersion)" -m "$(getComments)" 
+	    git add ./*
+	    echo ""
+	else
+	echo "Can't find debian folder; stopping"
+	exit
+	fi
+    else
+	echo "Can't find src folder; stopping"
+	exit
+    fi
 fi 
 
         
@@ -72,7 +81,4 @@ fi
     	echo "Invalid response"
     	exit 1
     fi
-#else
-#    echo "Wrong directory; no debian folder found"
-#    exit 1
-#fi
+
