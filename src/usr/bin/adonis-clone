@@ -55,13 +55,14 @@ fi
 if [ "${1}" = "--descriptions" -o "${1}" = "-d" ]; then
     repos=$(list)
     repodesc=$(list-desc)
-    count=1
-for repod  in $repos ; do
-    head=$repod
-    desc=`echo $repodesc | cut -d',' -f$count`
-    echo $head "-" $desc 
-    count=$[$count +1]
-done
+    count=1 
+    for repod  in $repos ; do
+      head=$repod
+      desc=`echo $repodesc | cut -d',' -f$count`
+      echo $head "-" $desc 
+      count=$[$count +1]
+    done
+    exit
 fi
 
 ##Search for a property
@@ -97,23 +98,4 @@ fi
 exit
 
 
-
-
-###############
-##Everything below this is test code and can be ignored
-###############
-
-#echo `list-desc`
-
-
-json=`cat /var/tmp/repos`
-prop="\"name\":"
-#urls=`jsonval`
-
-#repodesc=`list-desc`
-#echo `list`
-#repos=`list`
-#echo $repos | sed s/,/\n/g
-#IFS=","
-# count=1
 
