@@ -1,0 +1,68 @@
+ADONIS-CLONE(1)
+==============
+Bobby Martin <bobb.mrtn@gmail.com>
+
+NAME
+----
+adonis-clone - script to clone and use the adonis linux git repository
+
+SYNOPSIS
+--------
+*adonis-clone* ['OPTIONS']
+
+DESSCRIPTION
+------------
+The 'adonis-clone'(1) command automates the cloning of adonis linux packages by
+allowing you to simply provide the name of the package to clone. It also allows 
+you to query the repository for a list of packages and descriptions. Lastly, it
+also allows you to query for specific data such as clone urls by specifying 
+the neccessary fields. For a list of applicable fields, please consult the
+github API.
+
+OPTIONS
+-------
+*-h, --help*::
+     List all options available to 'adonis-clone'.
+
+*-l, --list*::
+     List all packages available for cloning.
+
+*-d, --descriptions*::
+     List all packagess along with there description.
+
+*-p, --property*::
+     Get an attribute based on a github property.
+
+*-u, --update*::
+     Refresh the list of packages in the repository.
+
+*-c, --clone*::
+     Clone a package from the github repository.
+
+COMMON USAGE EXAMPLES
+---------------------
+1. You want a list of all the packages available to clone.
+....................................
+$ adonis-clone --list
+....................................
+
+2. You want to clone a package so you can work on it.
+....................................
+$ adonis-clone -c adonis-devscripts
+....................................
+
+3.You need to refresh the list of available packages.
+....................................
+$ adonis-clone --update
+....................................
+
+AUTHORS
+-------
+This man page was written by Bobby Martin <bobb.mrtn@gmail.com>.
+The current version of adonis-devscripts was written by Bobby Martin.
+
+COPYING
+-------
+Free use of this software is granted under the terms of the GNU 
+General Public License (GPL) version 2.
+
