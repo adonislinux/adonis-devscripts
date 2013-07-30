@@ -7,7 +7,7 @@ Standards-Version: 3.6.2
 
 Package: adonis-devscripts
 Architecture: all
-Depends: dh-make, git, debhelper, devscripts, dh-make, curl
+Depends: git, debhelper, devscripts, dh-make, curl
 Description:  utility for creating adonis compliant packages
 utility for creating adonis compliant packages
 
