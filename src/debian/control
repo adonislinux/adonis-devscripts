@@ -9,5 +9,5 @@ Package: adonis-devscripts
 Architecture: all
 Depends: git, debhelper, devscripts, dh-make, curl
 Description:  utility for creating adonis compliant packages
-utility for creating adonis compliant packages
+ utility for creating adonis compliant packages
 
